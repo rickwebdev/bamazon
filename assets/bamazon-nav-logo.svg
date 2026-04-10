@@ -1,0 +1,27 @@
+<svg width="500" height="120" viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .brand { font-family: Arial, Helvetica, sans-serif; font-weight: bold; }
+  </style>
+
+  <!-- Transparent background -->
+
+  <!-- Text -->
+  <text x="20" y="70" fill="#111" font-size="48" class="brand">
+    Bamazon
+  </text>
+
+  <!-- Smile arrow parody -->
+  <path d="M30 85 Q200 120 420 80" 
+        stroke="#ff9900" 
+        stroke-width="6" 
+        fill="none" 
+        stroke-linecap="round"/>
+
+  <!-- Arrow tip -->
+  <polygon points="410,75 440,82 410,90" fill="#ff9900"/>
+
+  <!-- Subtle sarcastic tagline -->
+  <text x="22" y="105" fill="#777" font-size="12">
+    buy now. regret faster.
+  </text>
+</svg>

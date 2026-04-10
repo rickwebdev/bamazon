@@ -1,0 +1,588 @@
+<header class="amz-header full-width">
+  {% liquid
+    assign dept_menu = section.settings.menu
+    assign bar_menu = section.settings.bar_menu
+    assign show_bar = false
+    if bar_menu != blank and bar_menu.links.size > 0
+      assign show_bar = true
+    endif
+  %}
+  <div class="amz-header__primary">
+    <div class="amz-header__primary-inner">
+      <h2 class="header__title">
+        <a href="{{ routes.root_url }}" class="header__logo-link">
+          <img
+            class="header__logo"
+            src="{{ 'bamazon-nav.png' | asset_url }}"
+            alt="{{ shop.name }}"
+            width="200"
+            height="40"
+            loading="eager"
+          >
+        </a>
+      </h2>
+
+      <form class="amz-search" action="{{ routes.search_url }}" method="get" role="search" autocomplete="off">
+        <label class="visually-hidden" for="amz-search-q">Search {{ shop.name }}</label>
+        <input
+          id="amz-search-q"
+          class="amz-search__input"
+          type="search"
+          name="q"
+          placeholder="Search Bamazon"
+        >
+        <button class="amz-search__submit" type="submit" aria-label="{{ 'search.submit' | t }}">
+          <span class="amz-search__submit-icon">{{ 'icon-search.svg' | inline_asset_content }}</span>
+        </button>
+      </form>
+
+      <div class="header__icons">
+        {% if shop.customer_accounts_enabled %}
+          <shopify-account menu="{{ section.settings.customer_account_menu }}">
+            {{ 'icon-account.svg' | inline_asset_content }}
+          </shopify-account>
+        {% endif %}
+
+        <a
+          href="{{ routes.cart_url }}"
+          class="amz-header__cart"
+          {% if cart.item_count > 0 %}
+            aria-label="{{ 'header.cart_aria' | t: count: cart.item_count }}"
+          {% endif %}
+        >
+          <span class="amz-header__cart-icon-wrap">
+            {% if cart.item_count > 0 %}
+              <sup class="amz-header__cart-badge" aria-hidden="true">{{ cart.item_count }}</sup>
+            {% endif %}
+            {{ 'icon-cart.svg' | inline_asset_content }}
+          </span>
+          <span class="amz-header__cart-label">Cart</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="amz-header__sub">
+    <div class="amz-header__sub-inner">
+      <div class="amz-header__all-wrap">
+        <button
+          type="button"
+          class="amz-header__all-pill"
+          id="amz-all-toggle-{{ section.id }}"
+          aria-expanded="false"
+          aria-controls="amz-all-panel-{{ section.id }}"
+          aria-label="{{ 'header.categories_toggle' | t }}"
+        >
+          <span class="amz-header__all-burger" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <span class="amz-header__all-text">{{ 'header.categories' | t }}</span>
+        </button>
+        <div
+          id="amz-all-panel-{{ section.id }}"
+          class="amz-header__all-panel"
+          hidden
+        >
+          <nav class="amz-header__all-nav" aria-label="{{ 'header.categories' | t }}">
+            {% if dept_menu != blank and dept_menu.links.size > 0 %}
+              {% for link in dept_menu.links %}
+                <a class="amz-header__all-link" href="{{ link.url }}">{{ link.title | escape }}</a>
+                {% if link.links != blank %}
+                  {% for child in link.links %}
+                    <a class="amz-header__all-sublink" href="{{ child.url }}">{{ child.title | escape }}</a>
+                  {% endfor %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+            <a class="amz-header__all-link amz-header__all-link--emph" href="{{ routes.all_products_collection_url }}">
+              {{ 'breadcrumbs.all_products' | t }}
+            </a>
+          </nav>
+        </div>
+      </div>
+      <nav class="amz-header__sub-nav" aria-label="Quick shop">
+        {% if show_bar %}
+          {% for link in bar_menu.links %}
+            {{ link.title | link_to: link.url }}
+          {% endfor %}
+        {% endif %}
+        <a href="{{ routes.all_products_collection_url }}">All products</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+{% stylesheet %}
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  .amz-header {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: #fff;
+  }
+
+  .amz-header__primary {
+    background: #131921;
+    padding: 0.5rem clamp(12px, 2vw, 24px);
+  }
+
+  .amz-header__primary-inner {
+    max-width: min(1500px, 100%);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    min-height: 3.5rem;
+    color: #fff;
+  }
+
+  .header__title {
+    margin: 0;
+    flex: 0 0 auto;
+  }
+
+  .header__logo-link {
+    display: flex;
+    align-items: center;
+    line-height: 0;
+  }
+
+  .header__logo {
+    height: 2rem;
+    width: auto;
+    max-width: 12rem;
+    object-fit: contain;
+    filter: brightness(1.05);
+  }
+
+  .amz-search {
+    flex: 1 1 220px;
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    max-width: min(32rem, 100%);
+    height: 2.5rem;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #232f3e;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .amz-search:focus-within {
+    border-color: #f3a847;
+    box-shadow:
+      0 0 0 2px rgba(243, 168, 71, 0.45),
+      0 2px 8px rgba(0, 0, 0, 0.45);
+  }
+
+  .amz-search__input {
+    flex: 1;
+    border: none;
+    padding: 0 0.75rem;
+    font-size: 1rem;
+    color: #0f1111;
+    min-width: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .amz-search__input::placeholder {
+    color: #767676;
+  }
+
+  .amz-search__input:focus {
+    outline: none;
+  }
+
+  .amz-search__submit {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    border: none;
+    border-left: 1px solid #d5d9d9;
+    border-radius: 0;
+    background: linear-gradient(180deg, #febd69 0%, #f3a847 100%);
+    color: #0f1111;
+    cursor: pointer;
+    padding: 0 0.75rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transition: background 0.15s ease, filter 0.15s ease;
+  }
+
+  .amz-search__submit:hover {
+    background: linear-gradient(180deg, #f3d078 0%, #f0a93a 100%);
+    filter: brightness(1.02);
+  }
+
+  .amz-search__submit:active {
+    background: #f3a847;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    filter: none;
+  }
+
+  .amz-search__submit-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+  }
+
+  .amz-search__submit-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .header__icons {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    color: #fff;
+  }
+
+  .header__icons a,
+  .header__icons shopify-account {
+    position: relative;
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    box-sizing: border-box;
+  }
+
+  .header__icons shopify-account {
+    color: #fff;
+  }
+
+  .amz-header__cart {
+    gap: 0.45rem;
+    min-width: unset;
+    padding-inline: 0.125rem;
+    justify-content: flex-start;
+  }
+
+  .amz-header__cart-icon-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .amz-header__cart-icon-wrap svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .amz-header__cart-badge {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.35rem;
+    left: auto;
+    margin: 0;
+    z-index: 1;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1.15;
+    background: #f3a847;
+    color: #0f1111;
+    border-radius: 999px;
+    min-width: 1.1rem;
+    min-height: 1.1rem;
+    text-align: center;
+    padding: 0.1rem 0.2rem;
+    border: 1px solid #131921;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header__icons svg {
+    --icon-stroke-width: 1.5px;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+    color: inherit;
+  }
+
+  .amz-header__cart-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: none;
+  }
+
+  @media (min-width: 600px) {
+    .amz-header__cart-label {
+      display: inline;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .amz-header__primary {
+      padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+      padding-bottom: 0.5rem;
+      padding-left: max(clamp(10px, 3vw, 16px), env(safe-area-inset-left, 0px));
+      padding-right: max(clamp(10px, 3vw, 16px), env(safe-area-inset-right, 0px));
+    }
+
+    .amz-header__primary-inner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto auto;
+      align-items: center;
+      gap: 0.5rem 0.5rem;
+      min-height: unset;
+      flex-wrap: nowrap;
+    }
+
+    .header__title {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .header__icons {
+      grid-column: 3;
+      grid-row: 1;
+      margin-left: 0;
+      gap: 0.5rem;
+    }
+
+    .amz-search {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      flex: none;
+      max-width: none;
+      width: 100%;
+      min-width: 0;
+      height: 2.625rem;
+      border-radius: 8px;
+      border-color: #232f3e;
+    }
+
+    .amz-search__input {
+      font-size: 16px;
+      padding: 0 0.625rem;
+    }
+
+    .amz-search__submit {
+      min-width: 3rem;
+      padding: 0 0.875rem;
+    }
+
+    .amz-search__submit-icon svg {
+      width: 1.35rem;
+      height: 1.35rem;
+    }
+
+    .header__logo {
+      height: 1.75rem;
+      max-width: 9rem;
+    }
+  }
+
+  .amz-header__sub {
+    background: #232f3e;
+    padding: 0.35rem clamp(12px, 2vw, 24px);
+    font-size: 0.85rem;
+  }
+
+  .amz-header__sub-inner {
+    max-width: min(1500px, 100%);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .amz-header__all-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .amz-header__all-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.3rem 0.55rem;
+    font: inherit;
+    font-weight: 700;
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 2px;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .amz-header__all-pill:hover {
+    border-color: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .amz-header__all-pill[aria-expanded='true'] {
+    border-color: #febd69;
+    background: rgba(254, 189, 105, 0.12);
+  }
+
+  .amz-header__all-burger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    width: 1rem;
+    height: 0.75rem;
+  }
+
+  .amz-header__all-burger span {
+    display: block;
+    height: 2px;
+    background: #fff;
+    border-radius: 1px;
+  }
+
+  .amz-header__all-text {
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .amz-header__all-panel {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    z-index: 100;
+    min-width: min(18rem, calc(100vw - 2rem));
+    max-height: min(70vh, 28rem);
+    overflow: auto;
+    padding: 0.35rem 0;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    border: 1px solid #d5d9d9;
+  }
+
+  .amz-header__all-panel[hidden] {
+    display: none;
+  }
+
+  .amz-header__all-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .amz-header__all-link {
+    display: block;
+    padding: 0.55rem 1rem;
+    font-size: 0.875rem;
+    color: #0f1111;
+    text-decoration: none;
+    border-bottom: 1px solid #e7e7e7;
+  }
+
+  .amz-header__all-link:hover {
+    background: #f0f2f2;
+    color: #c7511f;
+  }
+
+  .amz-header__all-sublink {
+    display: block;
+    padding: 0.45rem 1rem 0.45rem 1.5rem;
+    font-size: 0.8125rem;
+    color: #565959;
+    text-decoration: none;
+    border-bottom: 1px solid #e7e7e7;
+  }
+
+  .amz-header__all-sublink:hover {
+    background: #f7f8f8;
+    color: #007185;
+  }
+
+  .amz-header__all-link--emph {
+    font-weight: 600;
+    border-bottom: none;
+    margin-top: 0.25rem;
+    padding-top: 0.65rem;
+    background: #f7f8f8;
+  }
+
+  .amz-header__sub-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: center;
+  }
+
+  .amz-header__sub-nav a {
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .amz-header__sub-nav a:hover {
+    text-decoration: underline;
+  }
+{% endstylesheet %}
+
+<script src="{{ 'header-all-menu.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "t:general.header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:labels.departments_menu",
+      "info": "Full list in the All menu (and blue bar fallback when Secondary bar is empty). Create menus under Online store → Navigation."
+    },
+    {
+      "type": "link_list",
+      "id": "bar_menu",
+      "label": "t:labels.bar_menu",
+      "info": "Optional. Short links on the blue bar (e.g. Sale, New). If empty, the bar only shows All products — full categories stay in the All menu. Each item can point to a collection, page, or any URL."
+    },
+    {
+      "type": "link_list",
+      "id": "customer_account_menu",
+      "label": "t:labels.customer_account_menu",
+      "default": "customer-account-main-menu"
+    }
+  ]
+}
+{% endschema %}

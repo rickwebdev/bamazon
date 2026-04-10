@@ -1,0 +1,476 @@
+{% comment %}
+  Cart page — Bamazon marketplace styling.
+{% endcomment %}
+
+<div class="bam-page bam-cart full-width">
+  <div class="bam-page__inner">
+    <nav class="bam-breadcrumb" aria-label="Breadcrumb">
+      <a class="bam-breadcrumb__link" href="{{ routes.root_url }}">Home</a>
+      <span class="bam-breadcrumb__sep" aria-hidden="true">›</span>
+      <span class="bam-breadcrumb__current">{{ 'cart.title' | t }}</span>
+    </nav>
+
+    <header class="bam-cart__header">
+      <h1 class="bam-cart__title">{{ 'cart.title' | t }}</h1>
+      {% if cart.item_count > 0 %}
+        <p class="bam-cart__count">{{ 'cart.items_count' | t: count: cart.item_count }}</p>
+      {% endif %}
+    </header>
+
+    {% if cart.item_count == 0 %}
+      <div class="bam-cart__empty">
+        <p class="bam-cart__empty-text">{{ 'cart.empty' | t }}</p>
+        <a class="bam-cart__btn bam-cart__btn--primary" href="{{ routes.all_products_collection_url }}">
+          {{ 'cart.continue_shopping' | t }}
+        </a>
+      </div>
+    {% else %}
+      <form action="{{ routes.cart_url }}" method="post" class="bam-cart__form" id="cart-form-{{ section.id }}">
+        <div class="bam-cart__layout">
+          <div class="bam-cart__lines" role="table" aria-label="{{ 'cart.title' | t }}">
+            <div class="bam-cart__thead" role="rowgroup">
+              <div class="bam-cart__row bam-cart__row--head" role="row">
+                <span class="bam-cart__cell bam-cart__cell--product" role="columnheader">Product</span>
+                <span class="bam-cart__cell bam-cart__cell--qty" role="columnheader">Qty</span>
+                <span class="bam-cart__cell bam-cart__cell--total" role="columnheader">Total</span>
+              </div>
+            </div>
+            <div class="bam-cart__tbody" role="rowgroup">
+              {% for item in cart.items %}
+                <div class="bam-cart__row bam-cart__row--line" role="row">
+                  <div class="bam-cart__cell bam-cart__cell--product" role="cell">
+                    <div class="bam-cart__product">
+                      <a class="bam-cart__thumb" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+                        {% if item.image %}
+                          {{
+                            item.image
+                            | image_url: width: 180, height: 180, crop: 'center'
+                            | image_tag:
+                              loading: 'lazy',
+                              alt: '',
+                              class: 'bam-cart__img',
+                              widths: '88, 180, 360',
+                              sizes: '88px'
+                          }}
+                        {% else %}
+                          <div class="bam-cart__img-placeholder" aria-hidden="true"></div>
+                        {% endif %}
+                      </a>
+                      <div class="bam-cart__meta">
+                        <a class="bam-cart__product-title" href="{{ item.url }}">{{ item.product.title | escape }}</a>
+                        {% unless item.product.has_only_default_variant %}
+                          <p class="bam-cart__variant">{{ item.variant.title | escape }}</p>
+                        {% endunless %}
+                        <div class="bam-cart__unit">{{ item.final_price | money }} <span class="bam-cart__each">{{ 'cart.each' | t }}</span></div>
+                        <a class="bam-cart__remove" href="{{ item.url_to_remove }}">{{ 'cart.remove' | t }}</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bam-cart__cell bam-cart__cell--qty" role="cell">
+                    <label class="visually-hidden" for="qty-{{ section.id }}-{{ forloop.index }}">Quantity</label>
+                    <input
+                      class="bam-cart__qty-input"
+                      type="number"
+                      id="qty-{{ section.id }}-{{ forloop.index }}"
+                      name="updates[]"
+                      value="{{ item.quantity }}"
+                      min="0"
+                      step="1"
+                      inputmode="numeric"
+                    >
+                  </div>
+                  <div class="bam-cart__cell bam-cart__cell--total" role="cell">
+                    <span class="bam-cart__line-price">{{ item.final_line_price | money }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <aside class="bam-cart__summary">
+            <div class="bam-cart__summary-card">
+              <div class="bam-cart__subtotal-row">
+                <span>{{ 'cart.subtotal' | t }}</span>
+                <span class="bam-cart__subtotal-amount">{{ cart.total_price | money }}</span>
+              </div>
+              {% if cart.taxes_included %}
+                <p class="bam-cart__tax-note">Tax included.</p>
+              {% endif %}
+              <div class="bam-cart__actions">
+                <button class="bam-cart__btn bam-cart__btn--secondary" type="submit" name="update">
+                  {{ 'cart.update' | t }}
+                </button>
+                <button class="bam-cart__btn bam-cart__btn--primary" type="submit" name="checkout">
+                  {{ 'cart.checkout' | t }}
+                </button>
+              </div>
+              <a class="bam-cart__continue" href="{{ routes.root_url }}">{{ 'cart.continue_shopping' | t }}</a>
+            </div>
+          </aside>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% stylesheet %}
+  .bam-cart.bam-page {
+    background: #eaeded;
+    padding: 1rem 0 3rem;
+    width: 100%;
+  }
+
+  .bam-cart .bam-page__inner {
+    max-width: min(1200px, 100%);
+    margin: 0 auto;
+    padding: 0 clamp(12px, 2vw, 24px);
+  }
+
+  .bam-cart .bam-breadcrumb {
+    font-size: 0.8125rem;
+    color: #565959;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .bam-cart .bam-breadcrumb__link {
+    color: #007185;
+    text-decoration: none;
+  }
+
+  .bam-cart .bam-breadcrumb__link:hover {
+    color: #c7511f;
+    text-decoration: underline;
+  }
+
+  .bam-cart .bam-breadcrumb__sep {
+    color: #949494;
+    user-select: none;
+  }
+
+  .bam-cart .bam-breadcrumb__current {
+    color: #0f1111;
+    font-weight: 500;
+  }
+
+  .bam-cart__header {
+    margin-bottom: 1.25rem;
+  }
+
+  .bam-cart__title {
+    font-size: clamp(1.5rem, 3vw, 1.85rem);
+    font-weight: 700;
+    color: #0f1111;
+    margin: 0 0 0.35rem;
+  }
+
+  .bam-cart__count {
+    font-size: 0.875rem;
+    color: #565959;
+    margin: 0;
+  }
+
+  .bam-cart__empty {
+    background: #fff;
+    border-radius: 8px;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(15, 17, 17, 0.1);
+  }
+
+  .bam-cart__empty-text {
+    font-size: 1rem;
+    color: #565959;
+    margin: 0 0 1.25rem;
+  }
+
+  .bam-cart__layout {
+    display: grid;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (min-width: 900px) {
+    .bam-cart__layout {
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+      gap: 2rem;
+    }
+
+    .bam-cart__summary {
+      position: sticky;
+      top: 1rem;
+    }
+  }
+
+  .bam-cart__lines {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 17, 17, 0.12);
+    border: 1px solid #e3e6e6;
+  }
+
+  .bam-cart__thead {
+    display: none;
+  }
+
+  @media (min-width: 700px) {
+    .bam-cart__thead {
+      display: block;
+      background: #f0f2f2;
+      border-bottom: 1px solid #e3e6e6;
+    }
+
+    .bam-cart__row--head {
+      display: grid;
+      grid-template-columns: 1fr 100px 100px;
+      gap: 1rem;
+      padding: 0.65rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #565959;
+    }
+
+    .bam-cart__row--line {
+      display: grid;
+      grid-template-columns: 1fr 100px 100px;
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem 1rem;
+      border-bottom: 1px solid #e7e7e7;
+    }
+
+    .bam-cart__row--line:last-child {
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 699px) {
+    .bam-cart__row--line {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1rem;
+      border-bottom: 1px solid #e7e7e7;
+    }
+
+    .bam-cart__cell--total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .bam-cart__cell--total::before {
+      content: 'Total';
+      font-weight: 600;
+      color: #565959;
+      font-size: 0.8125rem;
+    }
+  }
+
+  .bam-cart__product {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .bam-cart__thumb {
+    flex-shrink: 0;
+    width: 88px;
+    height: 88px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f8f8f8;
+    border: 1px solid #e3e6e6;
+  }
+
+  .bam-cart__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background-color: #f0f0f0;
+  }
+
+  .bam-cart__img-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 88px;
+    background: linear-gradient(145deg, #e3e6e6, #d5d9d9);
+  }
+
+  .bam-cart__meta {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .bam-cart__product-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #007185;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .bam-cart__product-title:hover {
+    color: #c7511f;
+    text-decoration: underline;
+  }
+
+  .bam-cart__variant {
+    font-size: 0.8125rem;
+    color: #565959;
+    margin: 0 0 0.35rem;
+  }
+
+  .bam-cart__unit {
+    font-size: 0.8125rem;
+    color: #0f1111;
+    margin-bottom: 0.35rem;
+  }
+
+  .bam-cart__each {
+    color: #767676;
+    font-size: 0.75rem;
+  }
+
+  .bam-cart__remove {
+    font-size: 0.8125rem;
+    color: #007185;
+    text-decoration: none;
+  }
+
+  .bam-cart__remove:hover {
+    color: #c7511f;
+    text-decoration: underline;
+  }
+
+  .bam-cart__qty-input {
+    width: 100%;
+    max-width: 4.5rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #d5d9d9;
+    border-radius: 6px;
+    background: #f7f8f8;
+    color: #0f1111;
+  }
+
+  .bam-cart__line-price {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f1111;
+  }
+
+  .bam-cart__summary-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(15, 17, 17, 0.12);
+    border: 1px solid #e3e6e6;
+  }
+
+  .bam-cart__subtotal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f1111;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e7e7e7;
+  }
+
+  .bam-cart__subtotal-amount {
+    font-size: 1.35rem;
+  }
+
+  .bam-cart__tax-note {
+    font-size: 0.75rem;
+    color: #767676;
+    margin: -0.5rem 0 1rem;
+  }
+
+  .bam-cart__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .bam-cart__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.65rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: 999px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    text-decoration: none;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .bam-cart__btn--primary {
+    color: #0f1111;
+    background: linear-gradient(180deg, #f7dfa5 0%, #f0c14b 100%);
+    border-color: #a88734;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .bam-cart__btn--primary:hover {
+    background: linear-gradient(180deg, #f5d78e 0%, #eeb933 100%);
+  }
+
+  .bam-cart__btn--secondary {
+    color: #0f1111;
+    background: #fff;
+    border-color: #d5d9d9;
+  }
+
+  .bam-cart__btn--secondary:hover {
+    background: #f0f2f2;
+  }
+
+  .bam-cart__continue {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #007185;
+    text-decoration: none;
+  }
+
+  .bam-cart__continue:hover {
+    color: #c7511f;
+    text-decoration: underline;
+  }
+
+  .bam-cart .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.cart",
+  "settings": []
+}
+{% endschema %}

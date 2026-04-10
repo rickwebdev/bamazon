@@ -1,0 +1,487 @@
+{% comment %}
+  Amazon-style homepage. Categories live in the global header (secondary bar + All menu);
+  no duplicate sidebar here.
+{% endcomment %}
+
+<div class="home-amazon full-width">
+  <div class="home-amazon__layout">
+    <div class="home-amazon__main">
+      <section class="home-amazon__hero" aria-label="Featured">
+        <div class="home-amazon__hero-copycol">
+          <div class="home-amazon__hero-inner">
+            <p class="home-amazon__eyebrow">Welcome to Bamazon</p>
+            <h1 class="home-amazon__hero-title">Deals end when courage does</h1>
+            <p class="home-amazon__hero-copy">
+              The internet's most trusted marketplace for things you didn't know existed until we recommended them. Browse millions of products across every category known to commerce, curated by an algorithm that has never met you and feels great about that.
+            </p>
+            <a class="home-amazon__hero-cta" href="{{ routes.all_products_collection_url }}">Shop all products</a>
+          </div>
+        </div>
+        <div class="home-amazon__hero-visual">
+          <img
+            class="home-amazon__hero-img"
+            src="{{ 'home-banner.png' | asset_url }}"
+            alt="{{ shop.name }} — curated product shelves"
+            width="1200"
+            height="800"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          >
+        </div>
+      </section>
+
+      {% liquid
+        assign grid_products = collections.all.products
+      %}
+
+      <section class="home-amazon__row" aria-labelledby="deals-heading">
+        <div class="home-amazon__row-head">
+          <h2 id="deals-heading" class="home-amazon__row-title">Today’s deals</h2>
+          <a class="home-amazon__row-link" href="{{ routes.all_products_collection_url }}">See all</a>
+        </div>
+        <div class="home-amazon__card-grid">
+          {% if grid_products.size > 0 %}
+            {% for product in grid_products limit: 6 %}
+              <article class="home-amazon__card">
+                <a class="home-amazon__card-link" href="{{ product.url }}">
+                  <div class="home-amazon__card-media">
+                    {% if product.featured_image %}
+                      {% liquid
+                        assign deal_alt = product.featured_image.alt | default: product.title
+                      %}
+                      {{
+                        product.featured_image
+                        | image_url: width: 400, height: 400, crop: 'center'
+                        | image_tag:
+                          loading: 'lazy',
+                          alt: deal_alt,
+                          class: 'home-amazon__card-img',
+                          widths: '200, 400, 600',
+                          sizes: '(min-width: 1100px) 180px, (min-width: 600px) 28vw, 50vw'
+                      }}
+                    {% else %}
+                      <div class="home-amazon__placeholder" aria-hidden="true"></div>
+                    {% endif %}
+                  </div>
+                  <h3 class="home-amazon__card-title">{{ product.title }}</h3>
+                  <p class="home-amazon__card-price">{{ product.price | money }}</p>
+                </a>
+              </article>
+            {% endfor %}
+          {% else %}
+            {% for i in (1..6) %}
+              <article class="home-amazon__card home-amazon__card--mock">
+                <div class="home-amazon__card-link" role="presentation">
+                  <div class="home-amazon__card-media">
+                    <div class="home-amazon__placeholder" aria-hidden="true"></div>
+                  </div>
+                  <h3 class="home-amazon__card-title">Product title {{ i }}</h3>
+                  <p class="home-amazon__card-price">$00.00</p>
+                  <p class="home-amazon__card-note">Placeholder — add products in Admin</p>
+                </div>
+              </article>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="home-amazon__row" aria-labelledby="picks-heading">
+        <div class="home-amazon__row-head">
+          <h2 id="picks-heading" class="home-amazon__row-title">Editors’ picks</h2>
+        </div>
+        <div class="home-amazon__card-grid home-amazon__card-grid--sm">
+          {% if grid_products.size > 6 %}
+            {% for product in grid_products offset: 6 limit: 4 %}
+              <article class="home-amazon__card">
+                <a class="home-amazon__card-link" href="{{ product.url }}">
+                  <div class="home-amazon__card-media">
+                    {% if product.featured_image %}
+                      {% liquid
+                        assign pick_alt = product.featured_image.alt | default: product.title
+                      %}
+                      {{
+                        product.featured_image
+                        | image_url: width: 400, height: 400, crop: 'center'
+                        | image_tag:
+                          loading: 'lazy',
+                          alt: pick_alt,
+                          class: 'home-amazon__card-img',
+                          widths: '200, 320, 400',
+                          sizes: '(min-width: 1100px) 200px, (min-width: 600px) 30vw, 50vw'
+                      }}
+                    {% else %}
+                      <div class="home-amazon__placeholder" aria-hidden="true"></div>
+                    {% endif %}
+                  </div>
+                  <h3 class="home-amazon__card-title">{{ product.title }}</h3>
+                  <p class="home-amazon__card-price">{{ product.price | money }}</p>
+                </a>
+              </article>
+            {% endfor %}
+          {% else %}
+            {% for i in (1..4) %}
+              <article class="home-amazon__card home-amazon__card--mock">
+                <div class="home-amazon__card-link" role="presentation">
+                  <div class="home-amazon__card-media">
+                    <div class="home-amazon__placeholder home-amazon__placeholder--tall" aria-hidden="true"></div>
+                  </div>
+                  <h3 class="home-amazon__card-title">Pick {{ i }}</h3>
+                  <p class="home-amazon__card-price">$00.00</p>
+                  <p class="home-amazon__card-note">Wire to a collection in Liquid</p>
+                </div>
+              </article>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .home-amazon {
+    background: #eaeded;
+    padding: 1rem 0 3rem;
+  }
+
+  @media (max-width: 767px) {
+    .home-amazon {
+      padding: 0.5rem 0 2rem;
+    }
+  }
+
+  .home-amazon__layout {
+    max-width: min(1500px, 100%);
+    margin: 0 auto;
+    padding: 0 clamp(12px, 2vw, 24px);
+  }
+
+  .home-amazon__main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+
+  .home-amazon__hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: stretch;
+    color: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    min-height: min(320px, 42vw);
+  }
+
+  .home-amazon__hero-copycol {
+    background: linear-gradient(135deg, #232f3e 0%, #131921 55%, #37475a 100%);
+    padding: 2rem 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .home-amazon__hero-inner {
+    max-width: 52ch;
+  }
+
+  .home-amazon__hero-visual {
+    position: relative;
+    min-height: 200px;
+    background: #1a1f2e;
+    isolation: isolate;
+  }
+
+  .home-amazon__hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+    display: block;
+  }
+
+  @media (max-width: 700px) {
+    .home-amazon__hero {
+      grid-template-columns: 1fr;
+      min-height: unset;
+    }
+
+    .home-amazon__hero-visual {
+      order: -1;
+      aspect-ratio: 21 / 9;
+      min-height: 160px;
+      max-height: min(42vw, 220px);
+    }
+
+    .home-amazon__hero-visual::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(19, 25, 33, 0.15) 0%, rgba(19, 25, 33, 0.45) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .home-amazon__hero-img {
+      object-fit: cover;
+      object-position: center center;
+    }
+
+    .home-amazon__hero-copycol {
+      padding: 1.25rem 1rem 1.5rem;
+    }
+  }
+
+  .home-amazon__eyebrow {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    margin: 0 0 0.5rem;
+  }
+
+  .home-amazon__hero-title {
+    font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    line-height: 1.2;
+  }
+
+  .home-amazon__hero-copy {
+    margin: 0 0 1.25rem;
+    line-height: 1.5;
+    opacity: 0.92;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 767px) {
+    .home-amazon__hero-copy {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.45;
+      max-height: calc(1.45em * 2);
+      word-break: break-word;
+      text-wrap: wrap;
+    }
+  }
+
+  .home-amazon__hero-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background: #febd69;
+    color: #0f1111;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .home-amazon__hero-cta:hover {
+    background: #f3a847;
+  }
+
+  .home-amazon__row {
+    background: #fff;
+    border-radius: 4px;
+    padding: 1rem 1rem 1.25rem;
+    box-shadow: 0 1px 2px rgba(15, 17, 17, 0.15);
+  }
+
+  @media (max-width: 767px) {
+    .home-amazon__row {
+      padding: 0.875rem 0.75rem 1rem;
+    }
+  }
+
+  .home-amazon__row-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .home-amazon__row-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f1111;
+    margin: 0;
+  }
+
+  .home-amazon__row-link {
+    font-size: 0.875rem;
+    color: #007185;
+    text-decoration: none;
+  }
+
+  .home-amazon__row-link:hover {
+    color: #c7511f;
+    text-decoration: underline;
+  }
+
+  .home-amazon__row-sub {
+    font-size: 0.8rem;
+    color: #565959;
+  }
+
+  .home-amazon__card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .home-amazon__card-grid--sm {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  @media (min-width: 1100px) {
+    .home-amazon__card-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .home-amazon__card-grid--sm {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767px) {
+    .home-amazon__card-grid,
+    .home-amazon__card-grid--sm {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 0.625rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0 0 0.625rem;
+      margin: 0;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: 0.75rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .home-amazon__card-grid::after,
+    .home-amazon__card-grid--sm::after {
+      content: '';
+      flex: 0 0 0.75rem;
+    }
+
+    .home-amazon__card-grid .home-amazon__card,
+    .home-amazon__card-grid--sm .home-amazon__card {
+      flex: 0 0 auto;
+      width: calc((100vw - 48px) / 2.35);
+      min-width: 140px;
+      max-width: 168px;
+      scroll-snap-align: start;
+    }
+  }
+
+  .home-amazon__card {
+    min-width: 0;
+  }
+
+  .home-amazon__card-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 4px;
+    padding: 0.5rem;
+    border: 1px solid transparent;
+  }
+
+  .home-amazon__card-link:hover {
+    border-color: #ddd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .home-amazon__card-media {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f8f8f8;
+    margin-bottom: 0.5rem;
+  }
+
+  .home-amazon__card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background-color: #f0f0f0;
+  }
+
+  .home-amazon__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, #e3e6e6, #d5d9d9);
+    min-height: 120px;
+  }
+
+  .home-amazon__placeholder--tall {
+    min-height: 140px;
+  }
+
+  .home-amazon__card-title {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #0f1111;
+    margin: 0 0 0.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.35;
+  }
+
+  .home-amazon__card-price {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f1111;
+    margin: 0;
+  }
+
+  .home-amazon__card-note {
+    font-size: 0.7rem;
+    color: #565959;
+    margin: 0.35rem 0 0;
+  }
+
+  .home-amazon__card--mock .home-amazon__card-link {
+    cursor: default;
+  }
+
+  .home-amazon__card--mock .home-amazon__card-link:hover {
+    border-color: transparent;
+    box-shadow: none;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Home (marketplace shell)",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Category navigation is in the header (secondary bar and All menu). Edit it under Theme settings → Header, or Online store → Navigation."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home marketplace shell",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

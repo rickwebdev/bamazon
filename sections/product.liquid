@@ -1,0 +1,516 @@
+{% comment %}
+  Product detail — Bamazon marketplace styling (gallery + buy box).
+  Breadcrumb category: `collection` exists only on /collections/.../products/... URLs; on /products/... we use product.collections or collections['all'].
+{% endcomment %}
+
+{% liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign product_form_id = 'product-form-' | append: section.id
+  assign bc_collection = collection
+  if bc_collection == blank
+    for coll in product.collections
+      if coll.handle != 'all' and coll.handle != 'frontpage'
+        assign bc_collection = coll
+        break
+      endif
+    endfor
+  endif
+  if bc_collection == blank
+    assign bc_collection = collections['all']
+  endif
+%}
+
+<div class="bam-page bam-product full-width">
+  <div class="bam-page__inner">
+    <nav class="bam-breadcrumb bam-breadcrumb--bar" aria-label="Breadcrumb">
+      <a class="bam-breadcrumb__link" href="{{ routes.root_url }}">{{ 'breadcrumbs.home' | t }}</a>
+      <span class="bam-breadcrumb__sep" aria-hidden="true">›</span>
+      {% if bc_collection != blank %}
+        {% assign bc_href = bc_collection.url | default: routes.all_products_collection_url %}
+        {% if bc_collection.title != blank %}
+          {% assign bc_label = bc_collection.title %}
+        {% else %}
+          {% assign bc_label = 'breadcrumbs.all_products' | t %}
+        {% endif %}
+        <a class="bam-breadcrumb__link" href="{{ bc_href }}">{{ bc_label | escape }}</a>
+        <span class="bam-breadcrumb__sep" aria-hidden="true">›</span>
+      {% else %}
+        <a class="bam-breadcrumb__link" href="{{ routes.all_products_collection_url }}">{{ 'breadcrumbs.all_products' | t }}</a>
+        <span class="bam-breadcrumb__sep" aria-hidden="true">›</span>
+      {% endif %}
+      <span class="bam-breadcrumb__current">{{ product.title | escape }}</span>
+    </nav>
+
+    <div class="bam-product__layout">
+      <div class="bam-product__gallery">
+        {% if product.featured_media and product.featured_media.media_type == 'image' %}
+          <div class="bam-product__hero-media">
+            {% liquid
+              assign main_alt = product.featured_media.alt | default: product.title
+              assign hero_src = product.featured_media | image_url: width: 1200
+            %}
+            <img
+              src="{{ hero_src }}"
+              alt="{{ main_alt | escape }}"
+              class="bam-product__hero-img"
+              width="{{ product.featured_media.width }}"
+              height="{{ product.featured_media.height }}"
+              loading="eager"
+              fetchpriority="high"
+              id="bam-product-hero-{{ section.id }}"
+            >
+          </div>
+        {% elsif product.featured_media %}
+          <div class="bam-product__hero-media">
+            {{ product.featured_media | media_tag: image_size: '1200x' }}
+          </div>
+        {% endif %}
+
+        {% if product.media.size > 1 %}
+          <ul class="bam-product__thumbs" role="list">
+            {% for media in product.media %}
+              {% if media.media_type == 'image' %}
+                <li>
+                  <button
+                    type="button"
+                    class="bam-product__thumb{% if forloop.first %} is-active{% endif %}"
+                    aria-label="Show image {{ forloop.index }}"
+                    data-bam-src="{{ media | image_url: width: 1200 }}"
+                  >
+                    {{
+                      media
+                      | image_url: width: 200, height: 200, crop: 'center'
+                      | image_tag:
+                        loading: 'lazy',
+                        alt: media.alt | default: product.title,
+                        class: 'bam-product__thumb-img',
+                        widths: '56, 100, 200',
+                        sizes: '56px'
+                    }}
+                  </button>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div class="bam-product__buy">
+        <div class="bam-product__buy-inner">
+          {% if product.vendor != blank %}
+            <p class="bam-product__vendor">{{ product.vendor | escape }}</p>
+          {% endif %}
+
+          <h1 class="bam-product__title">{{ product.title | escape }}</h1>
+
+          <div class="bam-product__price-block" data-bam-price>
+            {% if current_variant.compare_at_price > current_variant.price %}
+              <span class="bam-product__price bam-product__price--sale">{{ current_variant.price | money }}</span>
+              <span class="bam-product__compare">{{ current_variant.compare_at_price | money }}</span>
+            {% else %}
+              <span class="bam-product__price">{{ current_variant.price | money }}</span>
+            {% endif %}
+          </div>
+
+          {% if product.description != blank %}
+            <div class="bam-product__short rte">
+              {{ product.description }}
+            </div>
+          {% endif %}
+
+          {% form 'product', product, class: 'bam-product__form', id: product_form_id %}
+            {% if product.has_only_default_variant %}
+              <input type="hidden" name="id" value="{{ current_variant.id }}">
+            {% else %}
+              <div class="bam-product__option">
+                <label class="bam-product__label" for="Variant-{{ section.id }}">Options</label>
+                <select
+                  class="bam-product__select"
+                  name="id"
+                  id="Variant-{{ section.id }}"
+                  data-bam-variant-select
+                >
+                  {% for variant in product.variants %}
+                    <option
+                      value="{{ variant.id }}"
+                      {% if variant == current_variant %}selected="selected"{% endif %}
+                      {% unless variant.available %}disabled{% endunless %}
+                    >
+                      {{ variant.title | escape }} — {{ variant.price | money }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+
+            <div class="bam-product__qty-row">
+              <label class="bam-product__label" for="Quantity-{{ section.id }}">Quantity</label>
+              <input
+                class="bam-product__qty"
+                type="number"
+                id="Quantity-{{ section.id }}"
+                name="quantity"
+                min="1"
+                value="1"
+                inputmode="numeric"
+              >
+            </div>
+
+            <button
+              class="bam-product__submit"
+              type="submit"
+              name="add"
+              {% unless current_variant.available %}disabled{% endunless %}
+            >
+              {% if current_variant.available %}
+                Add to cart
+              {% else %}
+                Sold out
+              {% endif %}
+            </button>
+
+            {{ form | payment_button }}
+          {% endform %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .bam-page {
+    background: #eaeded;
+    padding: 1rem 0 3rem;
+    width: 100%;
+  }
+
+  .bam-page__inner {
+    max-width: min(1200px, 100%);
+    margin: 0 auto;
+    padding: 0 clamp(12px, 2vw, 24px);
+  }
+
+  .bam-breadcrumb {
+    font-size: 0.8125rem;
+    color: #565959;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .bam-breadcrumb--bar {
+    background: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #d5d9d9;
+    box-shadow: 0 1px 2px rgba(15, 17, 17, 0.08);
+    margin-bottom: 1.25rem;
+  }
+
+  .bam-breadcrumb__link {
+    color: #007185;
+    text-decoration: none;
+  }
+
+  .bam-breadcrumb__link:hover {
+    color: #c7511f;
+    text-decoration: underline;
+  }
+
+  .bam-breadcrumb__sep {
+    color: #949494;
+    user-select: none;
+  }
+
+  .bam-breadcrumb__current {
+    color: #0f1111;
+    font-weight: 500;
+  }
+
+  .bam-product .bam-page__inner {
+    max-width: min(1200px, 100%);
+  }
+
+  .bam-product__layout {
+    display: grid;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (min-width: 900px) {
+    .bam-product__layout {
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+      gap: 2.5rem;
+    }
+
+    .bam-product__buy {
+      position: sticky;
+      top: 1rem;
+    }
+  }
+
+  .bam-product__gallery {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(15, 17, 17, 0.12);
+  }
+
+  .bam-product__hero-media {
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f8f8f8;
+    aspect-ratio: 1;
+    max-height: min(560px, 70vh);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bam-product__hero-media video,
+  .bam-product__hero-media iframe {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .bam-product__hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .bam-product__thumbs {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .bam-product__thumb {
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .bam-product__thumb.is-active,
+  .bam-product__thumb:hover {
+    border-color: #febd69;
+  }
+
+  .bam-product__thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background-color: #f0f0f0;
+  }
+
+  .bam-product__buy-inner {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 1px 3px rgba(15, 17, 17, 0.12);
+    border: 1px solid #e3e6e6;
+  }
+
+  .bam-product__vendor {
+    font-size: 0.8125rem;
+    color: #007185;
+    margin: 0 0 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .bam-product__title {
+    font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+    font-weight: 700;
+    color: #0f1111;
+    margin: 0 0 0.75rem;
+    line-height: 1.25;
+  }
+
+  .bam-product__price-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e7e7e7;
+  }
+
+  .bam-product__price {
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: #0f1111;
+  }
+
+  .bam-product__price--sale {
+    color: #b12704;
+  }
+
+  .bam-product__compare {
+    font-size: 1rem;
+    color: #565959;
+    text-decoration: line-through;
+  }
+
+  .bam-product__short {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: #0f1111;
+    margin-bottom: 1.25rem;
+    max-height: 14rem;
+    overflow: auto;
+  }
+
+  .bam-product__short :first-child {
+    margin-top: 0;
+  }
+
+  .bam-product__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .bam-product__label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #0f1111;
+    margin-bottom: 0.35rem;
+  }
+
+  .bam-product__select,
+  .bam-product__qty {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.5rem 0.65rem;
+    font-size: 1rem;
+    border: 1px solid #d5d9d9;
+    border-radius: 6px;
+    background: #f7f8f8;
+    color: #0f1111;
+  }
+
+  .bam-product__qty {
+    max-width: 5rem;
+  }
+
+  .bam-product__qty-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bam-product__submit {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #0f1111;
+    background: linear-gradient(180deg, #f7dfa5 0%, #f0c14b 100%);
+    border: 1px solid #a88734;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .bam-product__submit:hover:not(:disabled) {
+    background: linear-gradient(180deg, #f5d78e 0%, #eeb933 100%);
+  }
+
+  .bam-product__submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .bam-product__form .shopify-payment-button {
+    margin-top: 0.5rem;
+  }
+
+  .bam-product__form .shopify-payment-button__button--unbranded {
+    border-radius: 999px !important;
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    var hero = document.getElementById('bam-product-hero-{{ section.id }}');
+    document.querySelectorAll('[data-bam-src]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var src = btn.getAttribute('data-bam-src');
+        if (!src || !hero) return;
+        hero.src = src;
+        document.querySelectorAll('.bam-product__thumb').forEach(function (b) {
+          b.classList.remove('is-active');
+        });
+        btn.classList.add('is-active');
+      });
+    });
+
+    var sel = document.querySelector('[data-bam-variant-select]');
+    var priceBlock = document.querySelector('[data-bam-price]');
+    var formEl = document.getElementById({{ product_form_id | json }});
+    var submit = formEl ? formEl.querySelector('.bam-product__submit') : null;
+    if (!sel || !priceBlock) return;
+
+    var variants = {{ product.variants | json }};
+    var currency = {{ cart.currency.iso_code | json }};
+
+    function money(cents) {
+      var n = Number(cents);
+      if (isNaN(n)) return '';
+      return (n / 100).toLocaleString(undefined, { style: 'currency', currency: currency });
+    }
+
+    sel.addEventListener('change', function () {
+      var id = parseInt(sel.value, 10);
+      var v = variants.find(function (x) {
+        return x.id === id;
+      });
+      if (!v) return;
+      var html = '';
+      var cp = v.compare_at_price != null ? Number(v.compare_at_price) : null;
+      var p = Number(v.price);
+      if (cp && cp > p) {
+        html =
+          '<span class="bam-product__price bam-product__price--sale">' +
+          money(p) +
+          '</span> <span class="bam-product__compare">' +
+          money(cp) +
+          '</span>';
+      } else {
+        html = '<span class="bam-product__price">' + money(p) + '</span>';
+      }
+      priceBlock.innerHTML = html;
+      if (submit) {
+        submit.disabled = !v.available;
+        submit.textContent = v.available ? 'Add to cart' : 'Sold out';
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "t:general.product",
+  "settings": [],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
