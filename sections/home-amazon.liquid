@@ -3,31 +3,206 @@
   no duplicate sidebar here.
 {% endcomment %}
 
+{% liquid
+  assign hero_h_clothing = section.settings.hero_handle_clothing | default: 'clothing'
+  assign hero_h_office = section.settings.hero_handle_office | default: 'office-supplies'
+  assign hero_h_electronics = section.settings.hero_handle_electronics | default: 'electronics'
+  if collections[hero_h_clothing] != blank
+    assign url_hero_clothing = collections[hero_h_clothing].url
+  else
+    assign url_hero_clothing = '/collections/' | append: hero_h_clothing
+  endif
+  if collections[hero_h_office] != blank
+    assign url_hero_office = collections[hero_h_office].url
+  else
+    assign url_hero_office = '/collections/' | append: hero_h_office
+  endif
+  if collections[hero_h_electronics] != blank
+    assign url_hero_electronics = collections[hero_h_electronics].url
+  else
+    assign url_hero_electronics = '/collections/' | append: hero_h_electronics
+  endif
+%}
+
 <div class="home-amazon full-width">
   <div class="home-amazon__layout">
     <div class="home-amazon__main">
-      <section class="home-amazon__hero" aria-label="Featured">
-        <div class="home-amazon__hero-copycol">
-          <div class="home-amazon__hero-inner">
-            <p class="home-amazon__eyebrow">Welcome to Bamazon</p>
-            <h1 class="home-amazon__hero-title">Deals end when courage does</h1>
-            <p class="home-amazon__hero-copy">
-              The internet's most trusted marketplace for things you didn't know existed until we recommended them. Browse millions of products across every category known to commerce, curated by an algorithm that has never met you and feels great about that.
-            </p>
-            <a class="home-amazon__hero-cta" href="{{ routes.all_products_collection_url }}">Shop all products</a>
+      <section
+        class="home-amazon__hero home-amazon__hero--carousel"
+        id="home-hero-{{ section.id }}"
+        data-home-hero-carousel
+        role="region"
+        aria-label="{{ 'home.hero_carousel.aria_region' | t }}"
+        aria-roledescription="carousel"
+        tabindex="0"
+      >
+        <div class="home-amazon__hero-carousel-viewport">
+          <div class="home-amazon__hero-carousel-track" data-carousel-track>
+            <div
+              class="home-amazon__hero-slide"
+              data-carousel-slide
+              aria-hidden="false"
+              role="group"
+              aria-label="{{ 'home.hero_carousel.slide_status' | t: current: 1, total: 4 }}"
+            >
+              <div class="home-amazon__hero-copycol">
+                <div class="home-amazon__hero-inner">
+                  <p class="home-amazon__eyebrow">{{ 'home.hero_carousel.eyebrow' | t }}</p>
+                  <h1 class="home-amazon__hero-title">{{ 'home.hero_carousel.default_title' | t }}</h1>
+                  <p class="home-amazon__hero-copy">{{ 'home.hero_carousel.default_copy' | t }}</p>
+                  <a class="home-amazon__hero-cta" href="{{ routes.all_products_collection_url }}">{{ 'breadcrumbs.all_products' | t }}</a>
+                </div>
+              </div>
+              <div class="home-amazon__hero-visual">
+                <img
+                  class="home-amazon__hero-img"
+                  src="{{ 'home-banner.png' | asset_url }}"
+                  alt="{{ 'home.hero_carousel.default_img_alt' | t }}"
+                  width="1200"
+                  height="800"
+                  loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
+                >
+              </div>
+            </div>
+
+            <div
+              class="home-amazon__hero-slide"
+              data-carousel-slide
+              aria-hidden="true"
+              role="group"
+              aria-label="{{ 'home.hero_carousel.slide_status' | t: current: 2, total: 4 }}"
+            >
+              <div class="home-amazon__hero-copycol">
+                <div class="home-amazon__hero-inner">
+                  <p class="home-amazon__eyebrow">{{ 'home.hero_carousel.eyebrow' | t }}</p>
+                  <h2 class="home-amazon__hero-title">{{ 'home.hero_carousel.clothing_title' | t }}</h2>
+                  <p class="home-amazon__hero-copy">{{ 'home.hero_carousel.clothing_copy' | t }}</p>
+                  <a class="home-amazon__hero-cta" href="{{ url_hero_clothing }}">{{ 'home.hero_carousel.clothing_cta' | t }}</a>
+                </div>
+              </div>
+              <div class="home-amazon__hero-visual">
+                <img
+                  class="home-amazon__hero-img"
+                  src="{{ 'no_pocket_jeans.png' | asset_url }}"
+                  alt="{{ 'home.hero_carousel.clothing_alt' | t }}"
+                  width="1200"
+                  height="800"
+                  loading="lazy"
+                  decoding="async"
+                >
+              </div>
+            </div>
+
+            <div
+              class="home-amazon__hero-slide"
+              data-carousel-slide
+              aria-hidden="true"
+              role="group"
+              aria-label="{{ 'home.hero_carousel.slide_status' | t: current: 3, total: 4 }}"
+            >
+              <div class="home-amazon__hero-copycol">
+                <div class="home-amazon__hero-inner">
+                  <p class="home-amazon__eyebrow">{{ 'home.hero_carousel.eyebrow' | t }}</p>
+                  <h2 class="home-amazon__hero-title">{{ 'home.hero_carousel.office_title' | t }}</h2>
+                  <p class="home-amazon__hero-copy">{{ 'home.hero_carousel.office_copy' | t }}</p>
+                  <a class="home-amazon__hero-cta" href="{{ url_hero_office }}">{{ 'home.hero_carousel.office_cta' | t }}</a>
+                </div>
+              </div>
+              <div class="home-amazon__hero-visual">
+                <img
+                  class="home-amazon__hero-img"
+                  src="{{ 'office_chair.png' | asset_url }}"
+                  alt="{{ 'home.hero_carousel.office_alt' | t }}"
+                  width="1200"
+                  height="800"
+                  loading="lazy"
+                  decoding="async"
+                >
+              </div>
+            </div>
+
+            <div
+              class="home-amazon__hero-slide"
+              data-carousel-slide
+              aria-hidden="true"
+              role="group"
+              aria-label="{{ 'home.hero_carousel.slide_status' | t: current: 4, total: 4 }}"
+            >
+              <div class="home-amazon__hero-copycol">
+                <div class="home-amazon__hero-inner">
+                  <p class="home-amazon__eyebrow">{{ 'home.hero_carousel.eyebrow' | t }}</p>
+                  <h2 class="home-amazon__hero-title">{{ 'home.hero_carousel.electronics_title' | t }}</h2>
+                  <p class="home-amazon__hero-copy">{{ 'home.hero_carousel.electronics_copy' | t }}</p>
+                  <a class="home-amazon__hero-cta" href="{{ url_hero_electronics }}">{{ 'home.hero_carousel.electronics_cta' | t }}</a>
+                </div>
+              </div>
+              <div class="home-amazon__hero-visual">
+                <img
+                  class="home-amazon__hero-img"
+                  src="{{ 'headphones.webp' | asset_url }}"
+                  alt="{{ 'home.hero_carousel.electronics_alt' | t }}"
+                  width="1200"
+                  height="800"
+                  loading="lazy"
+                  decoding="async"
+                >
+              </div>
+            </div>
           </div>
         </div>
-        <div class="home-amazon__hero-visual">
-          <img
-            class="home-amazon__hero-img"
-            src="{{ 'home-banner.png' | asset_url }}"
-            alt="{{ shop.name }} — curated product shelves"
-            width="1200"
-            height="800"
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
+
+        <div class="home-amazon__hero-carousel-bar">
+          <button
+            type="button"
+            class="home-amazon__hero-chevron"
+            data-carousel-prev
+            aria-label="{{ 'home.hero_carousel.prev' | t }}"
           >
+            ‹
+          </button>
+          <div class="home-amazon__hero-dots" role="group" aria-label="{{ 'home.hero_carousel.aria_region' | t }}">
+            <button
+              type="button"
+              class="home-amazon__hero-dot"
+              data-carousel-dot
+              aria-selected="true"
+              aria-label="{{ 'home.hero_carousel.go_to_slide' | t: n: 1 }}"
+            ></button>
+            <button
+              type="button"
+              class="home-amazon__hero-dot"
+              data-carousel-dot
+              aria-selected="false"
+              tabindex="-1"
+              aria-label="{{ 'home.hero_carousel.go_to_slide' | t: n: 2 }}"
+            ></button>
+            <button
+              type="button"
+              class="home-amazon__hero-dot"
+              data-carousel-dot
+              aria-selected="false"
+              tabindex="-1"
+              aria-label="{{ 'home.hero_carousel.go_to_slide' | t: n: 3 }}"
+            ></button>
+            <button
+              type="button"
+              class="home-amazon__hero-dot"
+              data-carousel-dot
+              aria-selected="false"
+              tabindex="-1"
+              aria-label="{{ 'home.hero_carousel.go_to_slide' | t: n: 4 }}"
+            ></button>
+          </div>
+          <button
+            type="button"
+            class="home-amazon__hero-chevron"
+            data-carousel-next
+            aria-label="{{ 'home.hero_carousel.next' | t }}"
+          >
+            ›
+          </button>
         </div>
       </section>
 
@@ -164,15 +339,124 @@
     min-width: 0;
   }
 
-  .home-amazon__hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    align-items: stretch;
+  .home-amazon__hero--carousel {
+    display: flex;
+    flex-direction: column;
     color: #fff;
     border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    outline: none;
+  }
+
+  .home-amazon__hero--carousel:focus-visible {
+    box-shadow:
+      0 2px 5px rgba(0, 0, 0, 0.2),
+      0 0 0 2px rgba(243, 168, 71, 0.6);
+  }
+
+  .home-amazon__hero-carousel-viewport {
+    overflow: hidden;
     min-height: min(320px, 42vw);
+  }
+
+  .home-amazon__hero-carousel-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-amazon__hero-carousel-track {
+      transition: none;
+    }
+  }
+
+  .home-amazon__hero-slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: stretch;
+    color: #fff;
+  }
+
+  .home-amazon__hero-slide[aria-hidden='true'] {
+    pointer-events: none;
+  }
+
+  .home-amazon__hero-carousel-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: #131921;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+  }
+
+  .home-amazon__hero-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    font-size: 1.35rem;
+    line-height: 1;
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 4px;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .home-amazon__hero-chevron:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.55);
+  }
+
+  .home-amazon__hero-chevron:focus-visible {
+    outline: 2px solid #febd69;
+    outline-offset: 2px;
+  }
+
+  .home-amazon__hero-dots {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .home-amazon__hero-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .home-amazon__hero-dot:hover {
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  .home-amazon__hero-dot[aria-selected='true'] {
+    background: #febd69;
+    transform: scale(1.15);
+  }
+
+  .home-amazon__hero-dot:focus-visible {
+    outline: 2px solid #febd69;
+    outline-offset: 2px;
   }
 
   .home-amazon__hero-copycol {
@@ -201,20 +485,36 @@
     display: block;
   }
 
-  @media (max-width: 700px) {
-    .home-amazon__hero {
-      grid-template-columns: 1fr;
+  /* Phone + tablet: stacked slide, fixed image aspect, copy column absorbs stretch (no gaps) */
+  @media (max-width: 1024px) {
+    .home-amazon__hero-carousel-viewport {
       min-height: unset;
+      height: auto;
     }
 
-    .home-amazon__hero-visual {
+    .home-amazon__hero-carousel-track {
+      height: auto;
+      align-items: stretch;
+    }
+
+    .home-amazon__hero-slide {
+      display: flex;
+      flex-direction: column;
+      grid-template-columns: unset;
+      min-height: 0;
+    }
+
+    .home-amazon__hero-slide .home-amazon__hero-visual {
       order: -1;
-      aspect-ratio: 21 / 9;
-      min-height: 160px;
-      max-height: min(42vw, 220px);
+      flex: 0 0 auto;
+      width: 100%;
+      min-height: 0;
+      max-height: none;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
     }
 
-    .home-amazon__hero-visual::after {
+    .home-amazon__hero-slide .home-amazon__hero-visual::after {
       content: '';
       position: absolute;
       inset: 0;
@@ -223,13 +523,33 @@
       z-index: 1;
     }
 
-    .home-amazon__hero-img {
+    .home-amazon__hero-slide .home-amazon__hero-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       object-position: center center;
     }
 
-    .home-amazon__hero-copycol {
+    .home-amazon__hero-slide .home-amazon__hero-copycol {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
       padding: 1.25rem 1rem 1.5rem;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    .home-amazon__hero-slide .home-amazon__hero-inner {
+      max-width: none;
+      width: 100%;
+    }
+  }
+
+  @media (min-width: 701px) and (max-width: 1024px) {
+    .home-amazon__hero-slide .home-amazon__hero-copycol {
+      padding: 1.5rem 1.35rem 1.75rem;
     }
   }
 
@@ -255,19 +575,19 @@
     font-size: 0.95rem;
   }
 
-  @media (max-width: 767px) {
-    .home-amazon__hero-copy {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      overflow: hidden;
+  @media (max-width: 1024px) {
+    .home-amazon__hero--carousel .home-amazon__hero-copy {
       margin-bottom: 1rem;
       font-size: 0.875rem;
-      line-height: 1.45;
-      max-height: calc(1.45em * 2);
+      line-height: 1.5;
       word-break: break-word;
-      text-wrap: wrap;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  @media (min-width: 701px) and (max-width: 1024px) {
+    .home-amazon__hero--carousel .home-amazon__hero-copy {
+      font-size: 0.9375rem;
     }
   }
 
@@ -468,6 +788,8 @@
   }
 {% endstylesheet %}
 
+<script src="{{ 'home-hero-carousel.js' | asset_url }}" defer></script>
+
 {% schema %}
 {
   "name": "Home (marketplace shell)",
@@ -475,6 +797,35 @@
     {
       "type": "paragraph",
       "content": "Category navigation is in the header (secondary bar and All menu). Edit it under Theme settings → Header, or Online store → Navigation."
+    },
+    {
+      "type": "header",
+      "content": "Hero carousel — category links"
+    },
+    {
+      "type": "paragraph",
+      "content": "Each button uses the collection URL for that handle (Products → Collections → collection name → edit URL handle). If a handle does not exist yet, the link still goes to /collections/your-handle."
+    },
+    {
+      "type": "text",
+      "id": "hero_handle_clothing",
+      "label": "Clothing collection handle",
+      "default": "clothing",
+      "info": "Default: clothing"
+    },
+    {
+      "type": "text",
+      "id": "hero_handle_office",
+      "label": "Office supplies collection handle",
+      "default": "office-supplies",
+      "info": "Default: office-supplies"
+    },
+    {
+      "type": "text",
+      "id": "hero_handle_electronics",
+      "label": "Electronics collection handle",
+      "default": "electronics",
+      "info": "Default: electronics"
     }
   ],
   "presets": [

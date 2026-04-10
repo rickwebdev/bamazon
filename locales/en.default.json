@@ -50,6 +50,31 @@
   "collections": {
     "title": "Collections"
   },
+  "home": {
+    "hero_carousel": {
+      "eyebrow": "Welcome to Bamazon",
+      "aria_region": "Featured categories",
+      "prev": "Previous slide",
+      "next": "Next slide",
+      "go_to_slide": "Go to slide {{ n }}",
+      "slide_status": "Slide {{ current }} of {{ total }}",
+      "default_title": "Deals end when courage does",
+      "default_copy": "The internet's most trusted marketplace for things you didn't know existed until we recommended them. Browse millions of products across every category known to commerce, curated by an algorithm that has never met you and feels great about that.",
+      "default_img_alt": "Curated product shelves and fulfillment center",
+      "clothing_title": "Pockets sold separately. Denim included.",
+      "clothing_copy": "Jeans for the person who reads slim fit and assumes it applies to their life choices. Ships in a box that has seen things. Fits like optimism, which is not a size.",
+      "clothing_cta": "Shop Clothing",
+      "clothing_alt": "Blue jeans laid flat on wood",
+      "office_title": "Sit down. Stand up. Repeat until morale improves.",
+      "office_copy": "Ergonomic support for the eight hours you promised would be productive. Assembly requires a screwdriver and a quiet acceptance of your career arc. Wheels roll; accountability does not.",
+      "office_cta": "Shop office supplies",
+      "office_alt": "Office chair in a modern workspace",
+      "electronics_title": "Sound you can trust. Silence we are still working on.",
+      "electronics_copy": "Audio tuned for conference calls, playlists, and pretending you did not hear the doorbell. Batteries included where legally required. Compatibility: your wallet, mostly.",
+      "electronics_cta": "Shop Electronics",
+      "electronics_alt": "Headphones product photo"
+    }
+  },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
     "card": "Gift card",
